@@ -20,8 +20,8 @@ st.markdown("##### Built with ❤️ by **VANI SAI DEEPIKA** ")
 mode = st.radio("Choose Mode", ["📁 Upload Your Dataset", "🧪 Try Demo Mode"])
 
 if mode == "📁 Upload Your Dataset":
-    uploaded_movies = st.file_uploader("Upload your `netflix_movies_detailed_up_to_2025.csv` file", type=["csv"], key="movies")
-    uploaded_shows = st.file_uploader("Upload your `netflix_tv_shows_detailed_up_to_2025.csv` file", type=["csv"], key="shows")
+    uploaded_movies = st.file_uploader("Upload your `netflix_movies_detailed_up_to_2025.csv`", type=["csv"], key="movies")
+    uploaded_shows = st.file_uploader("Upload your `netflix_tv_shows_detailed_up_to_2025.csv`", type=["csv"], key="shows")
     if uploaded_movies and uploaded_shows:
         movies_df = pd.read_csv(uploaded_movies)
         shows_df = pd.read_csv(uploaded_shows)
@@ -29,9 +29,13 @@ if mode == "📁 Upload Your Dataset":
         st.info("👈 Please upload both CSVs to proceed.")
         st.stop()
 else:
-    movies_df = pd.read_csv("netflix_movies_detailed_up_to_2025.csv")
-    shows_df = pd.read_csv("netflix_tv_shows_detailed_up_to_2025.csv")
-    st.success("✅ Loaded sample datasets for demo mode!")
+    try:
+        movies_df = pd.read_csv("data/netflix_movies_detailed_up_to_2025.csv")
+        shows_df = pd.read_csv("data/netflix_tv_shows_detailed_up_to_2025.csv")
+        st.success("✅ Loaded demo datasets from the repo for demo mode!")
+    except FileNotFoundError:
+        st.error("❌ Demo CSV files not found in `data/`. Please ensure your GitHub repo has them at `data/` level.")
+        st.stop()
 
 # ========== 🔄 Merge Data ==========
 common_cols = ['title', 'listed_in', 'release_year', 'duration']
@@ -50,14 +54,13 @@ with st.expander("📄 Dataset Preview"):
 
 # ========== 📊 Genre vs Popularity ==========
 st.subheader("📊 Genre vs Popularity")
-fig1 = px.histogram(df, x="genre", color="is_popular", barmode="group",
-                    title="Genre vs Popularity", height=400)
-st.plotly_chart(fig1)
+fig1 = px.histogram(df, x="genre", color="is_popular", barmode="group", title="Genre vs Popularity", height=400)
+st.plotly_chart(fig1, use_container_width=True)
 
 # ========== 📈 Release Year Trend ==========
 st.subheader("📈 Release Year Distribution")
 fig2 = px.histogram(df, x="release_year", nbins=20, title="Release Year Trend", height=400)
-st.plotly_chart(fig2)
+st.plotly_chart(fig2, use_container_width=True)
 
 # ========== 🔍 Feature Encoding ==========
 features = ['genre', 'release_year', 'duration_minutes']
@@ -101,14 +104,14 @@ imp_df = pd.DataFrame({
     "Importance": importance
 }).sort_values(by="Importance", ascending=False)
 fig4 = px.bar(imp_df, x='Feature', y='Importance', color='Importance', title="Which Features Matter Most?")
-st.plotly_chart(fig4)
+st.plotly_chart(fig4, use_container_width=True)
 
 # ========== 💾 Save Model ==========
-if st.button("💾 Save Model"):
+if st.button("💾 Save Trained Model"):
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/netflix_rf.pkl")
     joblib.dump(scaler, "models/netflix_scaler.pkl")
-    st.success("✅ Model saved successfully!")
+    st.success("✅ Model and scaler saved successfully in the `models/` directory!")
 
 # ========== 🧡 Footer ==========
 st.markdown("---")
