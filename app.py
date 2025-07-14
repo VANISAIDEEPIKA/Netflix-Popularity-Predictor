@@ -38,13 +38,18 @@ else:
         st.stop()
 
 # ========== 🔄 Merge Data ==========
-common_cols = ['title', 'listed_in', 'release_year', 'duration']
+common_cols = ['title', 'genres', 'release_year', 'duration']
+
+# Debug check for columns if needed
+# st.write("Movies columns:", movies_df.columns.tolist())
+# st.write("Shows columns:", shows_df.columns.tolist())
+
 movies_df = movies_df[common_cols]
 shows_df = shows_df[common_cols]
 df = pd.concat([movies_df, shows_df], ignore_index=True)
 
 # ========== 🧹 Preprocessing ==========
-df['genre'] = df['listed_in'].str.split(',').str[0].fillna('Unknown')
+df['genre'] = df['genres'].str.split(',').str[0].fillna('Unknown')
 df['duration_minutes'] = df['duration'].str.extract(r'(\d+)').astype(float)
 df['is_popular'] = ((df['release_year'] >= 2015) & (df['duration_minutes'] >= 90)).astype(int)
 
